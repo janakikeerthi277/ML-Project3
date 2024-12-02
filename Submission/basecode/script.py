@@ -224,6 +224,97 @@ def mlrPredict(W, data):
 
     return label
 
+def evaluate_model(model, train_data, train_label, validation_data, validation_label, test_data, test_label):
+    """
+    Evaluate the given SVM model on training, validation, and testing datasets.
+
+    Inputs:
+    - model: Trained SVM model
+    - train_data: Training data
+    - train_label: Training labels
+    - validation_data: Validation data
+    - validation_label: Validation labels
+    - test_data: Testing data
+    - test_label: Testing labels
+    """
+    # Compute accuracies
+    train_accuracy = model.score(train_data, train_label) * 100
+    validation_accuracy = model.score(validation_data, validation_label) * 100
+    test_accuracy = model.score(test_data, test_label) * 100
+
+    print(f"Training Accuracy: {train_accuracy:.2f}%")
+    print(f"Validation Accuracy: {validation_accuracy:.2f}%")
+    print(f"Testing Accuracy: {test_accuracy:.2f}%")
+
+    # Compute and print confusion matrix for testing data
+    test_predictions = model.predict(test_data)
+    cm = confusion_matrix(test_label, test_predictions)
+
+    print("\nConfusion Matrix (Testing Data):")
+    print(cm)
+
+    # Display confusion matrix as a heatmap
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)], yticklabels=[str(i) for i in range(10)])
+    plt.title("Confusion Matrix (Testing Data)")
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.show()
+
+    # Print classification report
+    print("\nClassification Report (Testing Data):")
+    print(classification_report(test_label, test_predictions))
+
+# Visualize and analyze results
+
+def visualize_and_analyze_with_heatmap(train_predictions, train_label, test_predictions, test_label, validation_predictions, validation_label, W):
+    """
+    Records and visualizes errors, computes accuracy, and generates heatmaps and classification reports.
+    """
+
+    # Classification report
+    print("\nClassification Report (Training Data):")
+    print(classification_report(train_label, train_predictions))
+
+    print("\nClassification Report (Testing Data):")
+    print(classification_report(test_label, test_predictions))
+
+    print("\nClassification Report (Validation Data):")
+    print(classification_report(validation_label, validation_predictions))
+
+
+    # Confusion matrix
+    train_cm = confusion_matrix(train_label, train_predictions)
+    test_cm = confusion_matrix(test_label, test_predictions)
+    validation_cm = confusion_matrix(validation_label, validation_predictions)
+
+    # Heatmap for training confusion matrix
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(train_cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)],
+                yticklabels=[str(i) for i in range(10)])
+    plt.title("Confusion Matrix (Training Data)")
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.show()
+
+    # Heatmap for testing confusion matrix
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(test_cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)],
+                yticklabels=[str(i) for i in range(10)])
+    plt.title("Confusion Matrix (Testing Data)")
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.show()  
+
+    # Heatmap for validation confusion matrix
+    plt.figure(figsize=(10, 7))
+    sns.heatmap(validation_cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)],
+                yticklabels=[str(i) for i in range(10)])
+    plt.title("Confusion Matrix (Validation Data)")
+    plt.xlabel("Predicted Labels")
+    plt.ylabel("True Labels")
+    plt.show()      
+
 if __name__ == "__main__":
 
     """
@@ -297,91 +388,127 @@ if __name__ == "__main__":
     # Find the accuracy on Testing Dataset
     predicted_label_test = blrPredict(W, test_data)
     print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label_test == test_label).astype(float))) + '%')
-    
-    # """
-    # Script for Support Vector Machine
-    # """
-    
-    # print('\n\n--------------SVM-------------------\n\n')
-    # ##################
-    # # YOUR CODE HERE #
-    # ##################
-    
-    
-    # """
-    # Script for Extra Credit Part
-    # """
-    # # FOR EXTRA CREDIT ONLY
-    # W_b = np.zeros((n_feature + 1, n_class))
-    # initialWeights_b = np.zeros((n_feature + 1, n_class))
-    # opts_b = {'maxiter': 100}
-    
-    # args_b = (train_data, Y)
-    # nn_params = minimize(mlrObjFunction, initialWeights_b, jac=True, args=args_b, method='CG', options=opts_b)
-    # W_b = nn_params.x.reshape((n_feature + 1, n_class))
-    
-    # # Find the accuracy on Training Dataset
-    # predicted_label_b = mlrPredict(W_b, train_data)
-    # print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label_b == train_label).astype(float))) + '%')
-    
-    # # Find the accuracy on Validation Dataset
-    # predicted_label_b = mlrPredict(W_b, validation_data)
-    # print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label_b == validation_label).astype(float))) + '%')
-    
-    # # Find the accuracy on Testing Dataset
-    # predicted_label_b = mlrPredict(W_b, test_data)
-    # print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label_b == test_label).astype(float))) + '%')
-    
 
+    visualize_and_analyze_with_heatmap(predicted_label_train, train_label, predicted_label_test, test_label, predicted_label_validation, validation_label, W)
 
-# Visualize and analyze results
-
-def visualize_and_analyze_with_heatmap(train_predictions, train_label, test_predictions, test_label, validation_predictions, validation_label, W):
+    
     """
-    Records and visualizes errors, computes accuracy, and generates heatmaps and classification reports.
+    Script for Support Vector Machine
     """
+    
+    # # Convert labels to 1D arrays for sklearn compatibility
+    train_label = train_label.ravel()
+    validation_label = validation_label.ravel()
+    test_label = test_label.ravel()
 
-    # Classification report
-    print("\nClassification Report (Training Data):")
-    print(classification_report(train_label, train_predictions))
+    # Randomly sample 10,000 training samples (to address SVM scaling issues)
+    random_indices = np.random.choice(train_data.shape[0], 10000, replace=False)
+    train_data_sampled = train_data[random_indices]
+    train_label_sampled = train_label[random_indices]
 
-    print("\nClassification Report (Testing Data):")
-    print(classification_report(test_label, test_predictions))
+    # 1. Linear Kernel
+    print("\nTraining SVM with Linear Kernel...")
+    linear_svm = svm.SVC(kernel="linear")
+    linear_svm.fit(train_data_sampled, train_label_sampled)
 
-    print("\nClassification Report (Validation Data):")
-    print(classification_report(validation_label, validation_predictions))
+    # Evaluate on training, validation, and testing data
+    print("\nResults for Linear Kernel:")
+    evaluate_model(linear_svm, train_data, train_label, validation_data, validation_label, test_data, test_label)
 
+    # 2. RBF Kernel with gamma=1
+    print("\nTraining SVM with RBF Kernel (gamma=1)...")
+    rbf_svm_gamma_1 = svm.SVC(kernel="rbf", gamma=1.0)
+    rbf_svm_gamma_1.fit(train_data_sampled, train_label_sampled)
 
-    # Confusion matrix
-    train_cm = confusion_matrix(train_label, train_predictions)
-    test_cm = confusion_matrix(test_label, test_predictions)
-    validation_cm = confusion_matrix(validation_label, validation_predictions)
+    # Evaluate on training, validation, and testing data
+    print("\nResults for RBF Kernel (gamma=1):")
+    evaluate_model(rbf_svm_gamma_1, train_data, train_label, validation_data, validation_label, test_data, test_label)
 
-    # Heatmap for training confusion matrix
-    plt.figure(figsize=(10, 7))
-    sns.heatmap(train_cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)],
-                yticklabels=[str(i) for i in range(10)])
-    plt.title("Confusion Matrix (Training Data)")
-    plt.xlabel("Predicted Labels")
-    plt.ylabel("True Labels")
+    # 3. RBF Kernel with default gamma
+    print("\nTraining SVM with RBF Kernel (default gamma)...")
+    rbf_svm_default_gamma = svm.SVC(kernel="rbf", gamma="scale")
+    rbf_svm_default_gamma.fit(train_data_sampled, train_label_sampled)
+
+    # Evaluate on training, validation, and testing data
+    print("\nResults for RBF Kernel (default gamma):")
+    evaluate_model(
+        rbf_svm_default_gamma,
+        train_data,
+        train_label,
+        validation_data,
+        validation_label,
+        test_data,
+        test_label,
+    )
+
+    # 4. RBF Kernel with default gamma and varying C
+    print("\nTraining SVM with RBF Kernel (default gamma) and varying C...")
+    C_values = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    training_accuracies = []
+    validation_accuracies = []
+    testing_accuracies = []
+
+    for C in C_values:
+        print(f"\nTraining with C = {C}...")
+        rbf_svm_varying_C = svm.SVC(kernel="rbf", gamma="scale", C=C)
+        rbf_svm_varying_C.fit(train_data_sampled, train_label_sampled)
+
+        # Evaluate on training, validation, and testing data
+        train_acc = rbf_svm_varying_C.score(train_data, train_label) * 100
+        val_acc = rbf_svm_varying_C.score(validation_data, validation_label) * 100
+        test_acc = rbf_svm_varying_C.score(test_data, test_label) * 100
+
+        print(f"Training Accuracy: {train_acc:.2f}%")
+        print(f"Validation Accuracy: {val_acc:.2f}%")
+        print(f"Testing Accuracy: {test_acc:.2f}%")
+
+        training_accuracies.append(train_acc)
+        validation_accuracies.append(val_acc)
+        testing_accuracies.append(test_acc)
+
+    # Plot accuracy vs. C values
+    plt.figure(figsize=(10, 6))
+    plt.plot(C_values, training_accuracies, label="Training Accuracy")
+    plt.plot(C_values, validation_accuracies, label="Validation Accuracy")
+    plt.plot(C_values, testing_accuracies, label="Testing Accuracy")
+    plt.xlabel("C Values")
+    plt.ylabel("Accuracy (%)")
+    plt.title("Accuracy vs C (RBF Kernel with Default Gamma)")
+    plt.legend()
+    plt.grid()
     plt.show()
 
-    # Heatmap for testing confusion matrix
-    plt.figure(figsize=(10, 7))
-    sns.heatmap(test_cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)],
-                yticklabels=[str(i) for i in range(10)])
-    plt.title("Confusion Matrix (Testing Data)")
-    plt.xlabel("Predicted Labels")
-    plt.ylabel("True Labels")
-    plt.show()  
+    # Running on complete set
 
-    # Heatmap for validation confusion matrix
-    plt.figure(figsize=(10, 7))
-    sns.heatmap(validation_cm, annot=True, fmt="d", cmap="Blues", xticklabels=[str(i) for i in range(10)],
-                yticklabels=[str(i) for i in range(10)])
-    plt.title("Confusion Matrix (Validation Data)")
-    plt.xlabel("Predicted Labels")
-    plt.ylabel("True Labels")
-    plt.show()      
+    rbf_model_full = svm.SVC(kernel = 'rbf', gamma = 'scale', C = 10)
+    rbf_model_full.fit(train_data, train_label.ravel())
 
-visualize_and_analyze_with_heatmap(predicted_label_train, train_label, predicted_label_test, test_label, predicted_label_validation, validation_label, W)
+    print('----------\n RBF with FULL training set with best C : \n------------')
+    print('\n Training Accuracy:' + str(100 * rbf_model_full.score(train_data, train_label)) + '%')
+    print('\n Validation Accuracy:' + str(100 * rbf_model_full.score(validation_data, validation_label)) + '%')
+    print('\n Testing Accuracy:' + str(100 * rbf_model_full.score(test_data, test_label)) + '%')
+    
+    """
+    Script for Extra Credit Part
+    """
+    # FOR EXTRA CREDIT ONLY
+    W_b = np.zeros((n_feature + 1, n_class))
+    initialWeights_b = np.zeros((n_feature + 1, n_class))
+    opts_b = {'maxiter': 100}
+    
+    args_b = (train_data, Y)
+    nn_params = minimize(mlrObjFunction, initialWeights_b, jac=True, args=args_b, method='CG', options=opts_b)
+    W_b = nn_params.x.reshape((n_feature + 1, n_class))
+    
+    # Find the accuracy on Training Dataset
+    predicted_label_b = mlrPredict(W_b, train_data)
+    print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label_b == train_label).astype(float))) + '%')
+    
+    # Find the accuracy on Validation Dataset
+    predicted_label_b = mlrPredict(W_b, validation_data)
+    print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label_b == validation_label).astype(float))) + '%')
+    
+    # Find the accuracy on Testing Dataset
+    predicted_label_b = mlrPredict(W_b, test_data)
+    print('\n Testing set Accuracy:' + str(100 * np.mean((predicted_label_b == test_label).astype(float))) + '%')
+    
